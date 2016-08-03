@@ -5,15 +5,10 @@
 
 #include "filemaker.h"
 
-typedef struct pokemon {
-  char number[3];
-  char name[30];
-  char englishName[30];
-  char type1[20];
-  char type2[20];
-} pokemon_t;
-
 int match(regex_t *pexp, char *sz) {
+
+          printf("Jep\n");
+
   int MAX_MATCHES = 1;
 	regmatch_t matches[MAX_MATCHES]; //A list of the matches in the string (a list of 1)
 	//Compare the string to the expression
@@ -98,24 +93,26 @@ int parseFile (char *filepath) {
   char* type1;
   char* type2;
 
-  pokemon_t pkm;
-
   while(fgets(line, 500, file) && a<152){
     if(match(&expEnglishName, line)){
       lan_flag++;
       if (lan_flag == 2){
         englishName = extractNameFromNonReferencedLine(line);
+        insertEnglishName(englishName);
         //pkm.englishName = &englishName;
         printf("Englisch: %s -- ", englishName);
         a++;
       }
     } else if(match(&expGermanName, line)){
       name = extractNameFromReferenceLine(line);
+      insertName(name);
       printf("Deutsch: %s -- ", name);
       //pkm.name = &name;
       lan_flag = 1;
     } else if(match(&expNumber, line)){
+      createNewValue();
       number = extractNumber(line);
+      insertNumber(number);
       //pkm.number = &number;
       printf("%s -- ", number);
     } else if(match(&expType, line)){
@@ -125,6 +122,8 @@ int parseFile (char *filepath) {
       if (type2 == NULL){
         type2 = "NULL";
       }
+      insertFirstType(type1);
+      insertSecondType(type2);
       //pkm.type1 = &type1;
       //pkm.type2 = &type2;
       printf("%s -- %s\n", type1, type2);
@@ -136,6 +135,7 @@ int parseFile (char *filepath) {
       //}
       //CREATE SQL Statement
       //createValue(number, name, englishName, type1, type2);
+      closeValue();
     }
   }
 

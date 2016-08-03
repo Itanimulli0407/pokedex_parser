@@ -5,16 +5,40 @@
 
 FILE *file;
 
+char* value;
+
 void createOrReplaceFile(){
   FILE *file = fopen("pokedex.txt", "wb+");
   fputs("INSERT INTO pokedex VALUES\n", file);
 }
 
-void createValue(char* number, char* name, char* englishName, char* type1,
-    char* type2){
-  char* buffer;
-  snprintf(buffer, sizeof buffer, ",(%s,'%s','%s','%s','%s')\n", number, name, englishName, type1, type2);
-  fputs(buffer, file);
+void createNewValue(){
+  value = ",(";
+}
+
+void insertNumber(char* number){
+  strcat(value, number);
+}
+
+void insertName(char* name){
+  strcat(strcat(strcat(value, ",'"),name),"',");
+}
+
+void insertEnglishName(char* englishName){
+  strcat(strcat(strcat(value, "'"),englishName),"',");
+}
+
+void insertFirstType(char* type){
+  strcat(strcat(strcat(value, "'"),type),"',");
+}
+
+void insertSecondType(char* type){
+  strcat(strcat(strcat(value, "'"),type),"'");
+}
+
+void closeValue(){
+  strcat(value, ")\n");
+  fputs(value, file);
 }
 
 void closeFile(){

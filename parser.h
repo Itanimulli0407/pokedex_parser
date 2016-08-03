@@ -6,9 +6,6 @@
 #include "filemaker.h"
 
 int match(regex_t *pexp, char *sz) {
-
-          printf("Jep\n");
-
   int MAX_MATCHES = 1;
 	regmatch_t matches[MAX_MATCHES]; //A list of the matches in the string (a list of 1)
 	//Compare the string to the expression

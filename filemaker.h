@@ -3,45 +3,44 @@
 #include <string.h>
 #include <regex.h>
 
-FILE *file;
+FILE *sqlfile;
 
 char* value;
 
 void createOrReplaceFile(){
-  FILE *file = fopen("pokedex.txt", "wb+");
-  fputs("INSERT INTO pokedex VALUES\n", file);
+  sqlfile = fopen("pokedex.txt", "wb+");
+  fprintf(sqlfile, "INSERT INTO pokedex VALUES\n");
 }
 
-void createNewValue(){
-  value = ",(";
+void insertFirstNumber(char* number){
+  fprintf(sqlfile, "(%s,", number);
 }
 
 void insertNumber(char* number){
-  strcat(value, number);
+  fprintf(sqlfile, ",(%s,", number);
 }
 
 void insertName(char* name){
-  strcat(strcat(strcat(value, ",'"),name),"',");
+  fprintf(sqlfile, "\'%s\',", name);
 }
 
 void insertEnglishName(char* englishName){
-  strcat(strcat(strcat(value, "'"),englishName),"',");
+  fprintf(sqlfile, "\'%s\',", englishName);
 }
 
-void insertFirstType(char* type){
-  strcat(strcat(strcat(value, "'"),type),"',");
+void insertFirstType(char* type1){
+  fprintf(sqlfile, "\'%s\',", type1);
 }
 
-void insertSecondType(char* type){
-  strcat(strcat(strcat(value, "'"),type),"'");
-}
-
-void closeValue(){
-  strcat(value, ")\n");
-  fputs(value, file);
+void insertSecondType(char* type2){
+  if (strcmp(type2,"NULL") == 0){
+    fprintf(sqlfile, "NULL)\n");
+  } else {
+    fprintf(sqlfile, "\'%s\')\n", type2);
+  }
 }
 
 void closeFile(){
-  fputs(";", file);
-  fclose(file);
+  fprintf(sqlfile, ";");
+  fclose(sqlfile);
 }

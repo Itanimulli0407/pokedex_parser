@@ -28,10 +28,20 @@ char* extractNameFromReferenceLine(char line[500]){
 }
 
 char* extractNumber(char line[500]){
-  char delimiter[] = "><";
+  char delimiter[] = ">< ";
   char *word;
   word = strtok(line, delimiter);
   word = strtok(NULL, delimiter);
+  return word;
+}
+
+char* extractNumberFromReferencedLine(char line[500]){
+  char delimiter[] = ">< ";
+  char *word;
+  word = strtok(line, delimiter);
+  for (int i = 0; i<4; i++){
+    word = strtok(NULL, delimiter);
+  }
   return word;
 }
 
@@ -72,11 +82,14 @@ int parseFile (char *filepath) {
 	regex_t expEnglishName;
   regex_t expGermanName;
   regex_t expNumber;
+  regex_t expNumberReferenced;
   regex_t expType;
+
   // Compile the expressions for names of pokemon
-	regcomp(&expEnglishName, "<td> [A-Z,a-z2()]* </td>", REG_EXTENDED);
-  regcomp(&expGermanName, "<td> <a href=\"/[A-Z,a-z2()]*\" title=\"[A-Z,a-z2()]*\">[A-Z,a-z2()]*</a> </td>.", REG_EXTENDED);
-  regcomp(&expNumber, "<td> [0-9][0-9][0-9] </td>", REG_EXTENDED);
+	regcomp(&expEnglishName, "<td> [A-Z,a-z2()-]* </td>", REG_EXTENDED);
+  regcomp(&expGermanName, "<td> <a href=\"/[A-Z,a-z2()-]*\" title=\"[A-Z,a-z2()-]*\">[A-Z,a-z2()-]*</a> </td>.", REG_EXTENDED);
+  regcomp(&expNumber, "<td> [0-9]* </td>", REG_EXTENDED);
+  regcomp(&expNumberReferenced, "<td> <span id=\".*\"></span>.*</td>", REG_EXTENDED);
   regcomp(&expType, "<td> <a href=\"/.*\" title=\".*\"><img alt=.*" , REG_EXTENDED);
 
   // Parse the file with regex-matching
@@ -90,59 +103,59 @@ int parseFile (char *filepath) {
   char* type1;
   char* type2;
 
-  while(fgets(line, 500, file) && a<152){
-    if(match(&expEnglishName, line)){
-      lan_flag++;
-      if (lan_flag == 2){
-        englishName = extractNameFromNonReferencedLine(line);
-        insertEnglishName(englishName);
-        //pkm.englishName = &englishName;
-        printf("Englisch: %s -- ", englishName);
+  while(fgets(line, 500, file) && a<387){
+    if (a > 0){
+      if(match(&expEnglishName, line)){
+        lan_flag++;
+        if (lan_flag == 2){
+          englishName = extractNameFromNonReferencedLine(line);
+          insertEnglishName(englishName);
+          printf("Englisch: %s -- ", englishName);
+        }
+      } else if(match(&expGermanName, line)){
+        name = extractNameFromReferenceLine(line);
+        // I have no clue why corasonn doesn't work
+        if (strcmp(name, "Corasonn") == 0){
+          insertNumber("222");
+        }
+        insertName(name);
+        printf("Deutsch: %s -- ", name);
+        lan_flag = 1;
+      } else if(match(&expNumber, line)){
+        number = extractNumber(line);
+        printf("%s -- ", number);
+        insertNumber(number);
+      } else if (match(&expNumberReferenced, line)){
+        number = extractNumberFromReferencedLine(line);
+        printf("%s -- ", number);
+        if (strcmp(number, "001") == 0){
+          insertFirstNumber(number);
+        } else {
+          insertNumber(number);
+        }
+      } else if(match(&expType, line)){
+        types = extractTypes(line);
+        type1 = strtok(types, " ");
+        type2 = strtok(NULL, " ");
+        if (type2 == NULL){
+          type2 = "NULL";
+        }
+        insertFirstType(type1);
+        insertSecondType(type2);
+        printf("%s -- %s\n", type1, type2);
         a++;
       }
-    } else if(match(&expGermanName, line)){
-      name = extractNameFromReferenceLine(line);
-      insertName(name);
-      printf("Deutsch: %s -- ", name);
-      //pkm.name = &name;
-      lan_flag = 1;
-    } else if(match(&expNumber, line)){
-      createNewValue();
-      number = extractNumber(line);
-      insertNumber(number);
-      //pkm.number = &number;
-      printf("%s -- ", number);
-    } else if(match(&expType, line)){
-      types = extractTypes(line);
-      type1 = strtok(types, " ");
-      type2 = strtok(NULL, " ");
-      if (type2 == NULL){
-        type2 = "NULL";
-      }
-      insertFirstType(type1);
-      insertSecondType(type2);
-      //pkm.type1 = &type1;
-      //pkm.type2 = &type2;
-      printf("%s -- %s\n", type1, type2);
-
-//printf("%s+\n", name);
-      //Special case for Bulbasaur
-      //if (strcmp(name, "Bisasam") == 0){
-      //  number = "001";
-      //}
-      //CREATE SQL Statement
-      //createValue(number, name, englishName, type1, type2);
-      closeValue();
     }
   }
 
   regfree(&expEnglishName);
   regfree(&expGermanName);
   regfree(&expNumber);
+  regfree(&expNumberReferenced);
   regfree(&expType);
 
   // Complete the SQL Statement
-  //closeFile();
+  closeFile();
   // Close the pokedex file
   fclose(file);
 

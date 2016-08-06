@@ -11,7 +11,11 @@ int main (int argc, char *argv[]){
     return 1;
   } else {
     printf("Started parsing \n");
-    parseFile(argv[1]);
+    if (strcmp(argv[1], "pokedex.html") == 0){
+      parsePokedex(argv[1]);
+    } else if (strcmp(argv[1], "attacks.html") == 0){
+      parseAttacks(argv[1]);
+    }
     printf("Parsing done\n");
   }
   return 0;

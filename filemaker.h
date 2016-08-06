@@ -3,44 +3,23 @@
 #include <string.h>
 #include <regex.h>
 
-FILE *sqlfile;
+#ifndef FILEMAKER_H
+#define FILEMAKER_H
 
-char* value;
+extern void createOrReplaceFile();
 
-void createOrReplaceFile(){
-  sqlfile = fopen("pokedex.txt", "wb+");
-  fprintf(sqlfile, "INSERT INTO pokedex VALUES\n");
-}
+extern void insertFirstNumber(char*);
 
-void insertFirstNumber(char* number){
-  fprintf(sqlfile, "(%s,", number);
-}
+extern void insertNumber(char*);
 
-void insertNumber(char* number){
-  fprintf(sqlfile, ",(%s,", number);
-}
+extern void insertName(char*);
 
-void insertName(char* name){
-  fprintf(sqlfile, "\'%s\',", name);
-}
+extern void insertEnglishName(char*);
 
-void insertEnglishName(char* englishName){
-  fprintf(sqlfile, "\'%s\',", englishName);
-}
+extern void insertFirstType(char*);
 
-void insertFirstType(char* type1){
-  fprintf(sqlfile, "\'%s\',", type1);
-}
+extern void insertSecondType(char*);
 
-void insertSecondType(char* type2){
-  if (strcmp(type2,"NULL") == 0){
-    fprintf(sqlfile, "NULL)\n");
-  } else {
-    fprintf(sqlfile, "\'%s\')\n", type2);
-  }
-}
+extern void closeFile();
 
-void closeFile(){
-  fprintf(sqlfile, ";");
-  fclose(sqlfile);
-}
+#endif /*FILEMAKER_H*/
